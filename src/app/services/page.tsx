@@ -46,8 +46,7 @@ export default function ServicesPage() {
   const validatedHoursPerWeek = Math.max(1, Number.isFinite(planner.hoursPerWeek) ? planner.hoursPerWeek : 1);
   const validatedWeeksUntilExam = Math.max(1, Number.isFinite(planner.weeksUntilExam) ? planner.weeksUntilExam : 1);
   // Calculates total study hours; with 1 hour per session this equals total sessions.
-  const estimatedSessions = Math.max(1, Math.ceil(validatedHoursPerWeek * validatedWeeksUntilExam));
-  const totalStudyHours = estimatedSessions; // 1 hour per session assumption keeps values aligned
+  const estimatedSessions = Math.max(1, Math.ceil(validatedHoursPerWeek * validatedWeeksUntilExam)); // 1 hour per session assumption means sessions equal hours
   const singleCost = estimatedSessions * 50;
   const package5Cost = 225 + Math.max(0, estimatedSessions - 5) * 50;
   const package10Cost = 400 + Math.max(0, estimatedSessions - 10) * 50;
@@ -75,9 +74,10 @@ export default function ServicesPage() {
   };
 
   const applyPlannerToBooking = () => {
+    const savingsText = savings > 0 ? `, saving ~$${savings}` : '';
     const note = [
       `Planner summary: ~${estimatedSessions} session(s) over ${validatedWeeksUntilExam} week(s) at ${validatedHoursPerWeek} hour(s)/week.`,
-      `Suggested plan: ${suggestedPlan} (est. ~$${estimatedCost}${savings > 0 ? `, saving ~$${savings}` : ''}).`,
+      `Suggested plan: ${suggestedPlan} (est. ~$${estimatedCost}${savingsText}).`,
     ].join(' ');
     setFormData((prev) => ({
       ...prev,
@@ -206,7 +206,7 @@ export default function ServicesPage() {
                 </div>
                 <div className="bg-white/10 rounded-lg p-3">
                   <p className="text-blue-100 text-xs uppercase tracking-wide">Total Study Hours</p>
-                  <p className="text-3xl font-bold">{totalStudyHours}</p>
+                  <p className="text-3xl font-bold">{estimatedSessions}</p>
                 </div>
               </div>
               <div className="bg-white/10 rounded-lg p-4">
