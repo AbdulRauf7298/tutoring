@@ -43,9 +43,10 @@ export default function ServicesPage() {
   const [submitted, setSubmitted] = useState(false);
   const [planner, setPlanner] = useState({ hoursPerWeek: 2, weeksUntilExam: 8 });
 
-  const safeHours = Math.max(1, Number.isFinite(planner.hoursPerWeek) ? planner.hoursPerWeek : 1);
-  const safeWeeks = Math.max(1, Number.isFinite(planner.weeksUntilExam) ? planner.weeksUntilExam : 1);
-  const estimatedSessions = Math.max(1, Math.ceil(safeHours * safeWeeks));
+  const validatedHoursPerWeek = Math.max(1, Number.isFinite(planner.hoursPerWeek) ? planner.hoursPerWeek : 1);
+  const validatedWeeksUntilExam = Math.max(1, Number.isFinite(planner.weeksUntilExam) ? planner.weeksUntilExam : 1);
+  // Assumes 1 hour per session so total hours equals total sessions.
+  const estimatedSessions = Math.max(1, Math.ceil(validatedHoursPerWeek * validatedWeeksUntilExam));
   const singleCost = estimatedSessions * 50;
   const package5Cost = 225 + Math.max(0, estimatedSessions - 5) * 50;
   const package10Cost = 400 + Math.max(0, estimatedSessions - 10) * 50;
@@ -73,7 +74,7 @@ export default function ServicesPage() {
   };
 
   const applyPlannerToBooking = () => {
-    const note = `Planner summary: ~${estimatedSessions} session(s) over ${safeWeeks} week(s) at ${safeHours} hour(s)/week. Suggested plan: ${suggestedPlan} (est. ~$${estimatedCost}${savings > 0 ? `, saving ~$${savings}` : ''}).`;
+    const note = `Planner summary: ~${estimatedSessions} session(s) over ${validatedWeeksUntilExam} week(s) at ${validatedHoursPerWeek} hour(s)/week. Suggested plan: ${suggestedPlan} (est. ~$${estimatedCost}${savings > 0 ? `, saving ~$${savings}` : ''}).`;
     setFormData((prev) => ({
       ...prev,
       message: prev.message ? `${prev.message}\n\n${note}` : note,
@@ -201,7 +202,7 @@ export default function ServicesPage() {
                 </div>
                 <div className="bg-white/10 rounded-lg p-3">
                   <p className="text-blue-100 text-xs uppercase tracking-wide">Total Study Hours</p>
-                  <p className="text-3xl font-bold">{Math.ceil(safeHours * safeWeeks)}</p>
+                  <p className="text-3xl font-bold">{estimatedSessions}</p>
                 </div>
               </div>
               <div className="bg-white/10 rounded-lg p-4">
