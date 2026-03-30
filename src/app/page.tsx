@@ -145,7 +145,7 @@ export default function Home() {
             {testimonials.map((t) => (
               <div key={t.name} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                 <div className="text-[#f59e0b] text-xl mb-3">⭐⭐⭐⭐⭐</div>
-                <p className="text-gray-600 italic mb-4">"{t.quote}"</p>
+                <p className="text-gray-600 italic mb-4">&ldquo;{t.quote}&rdquo;</p>
                 <div>
                   <p className="font-semibold text-[#1e3a5f]">{t.name}</p>
                   <p className="text-sm text-[#2563eb]">{t.curriculum}</p>

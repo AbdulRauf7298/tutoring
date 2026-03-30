@@ -41,10 +41,45 @@ export default function ServicesPage() {
     name: '', email: '', subject: '', curriculum: '', date: '', message: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [planner, setPlanner] = useState({ hoursPerWeek: 2, weeksUntilExam: 8 });
+
+  const safeHours = Math.max(1, Number.isFinite(planner.hoursPerWeek) ? planner.hoursPerWeek : 1);
+  const safeWeeks = Math.max(1, Number.isFinite(planner.weeksUntilExam) ? planner.weeksUntilExam : 1);
+  const estimatedSessions = Math.max(1, Math.ceil(safeHours * safeWeeks));
+  const singleCost = estimatedSessions * 50;
+  const package5Cost = 225 + Math.max(0, estimatedSessions - 5) * 50;
+  const package10Cost = 400 + Math.max(0, estimatedSessions - 10) * 50;
+
+  let suggestedPlan = 'Pay-as-you-go sessions';
+  let estimatedCost = singleCost;
+  let coverageNote = 'Book single sessions as you need them.';
+  let savings = 0;
+
+  if (package10Cost <= package5Cost && package10Cost <= singleCost) {
+    suggestedPlan = 'Package – 10 Sessions';
+    estimatedCost = package10Cost;
+    coverageNote = 'Best for intensive prep with 20% savings.';
+    savings = Math.max(0, singleCost - estimatedCost);
+  } else if (package5Cost <= singleCost) {
+    suggestedPlan = 'Package – 5 Sessions';
+    estimatedCost = package5Cost;
+    coverageNote = 'Ideal for short sprints with 10% savings.';
+    savings = Math.max(0, singleCost - estimatedCost);
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
+  };
+
+  const applyPlannerToBooking = () => {
+    const note = `Planner summary: ~${estimatedSessions} session(s) over ${safeWeeks} week(s) at ${safeHours} hour(s)/week. Suggested plan: ${suggestedPlan} (est. ~$${estimatedCost}${savings > 0 ? `, saving ~$${savings}` : ''}).`;
+    setFormData((prev) => ({
+      ...prev,
+      message: prev.message ? `${prev.message}\n\n${note}` : note,
+    }));
+    const bookingSection = document.getElementById('booking');
+    bookingSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
@@ -115,6 +150,84 @@ export default function ServicesPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Study Planner */}
+      <section className="py-12 px-4 bg-white border-t border-gray-100">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#f59e0b]/15 text-[#b45309] text-xs font-semibold rounded-full">
+              ✨ New • Plan your prep
+            </div>
+            <h2 className="text-2xl font-bold text-[#1e3a5f]">Study Plan Estimator</h2>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              Tell us how many hours you want to study each week and how many weeks you have before your exam.
+              We&apos;ll suggest the most cost-effective package and pre-fill the booking form for you.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-[#1e3a5f] mb-1">Hours per week</label>
+                <input
+                  type="number"
+                  min={1}
+                  step={0.5}
+                  value={planner.hoursPerWeek}
+                  onChange={(e) => setPlanner((prev) => ({ ...prev, hoursPerWeek: Number(e.target.value) || 1 }))}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-[#1e3a5f] mb-1">Weeks until exam/goal</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={planner.weeksUntilExam}
+                  onChange={(e) => setPlanner((prev) => ({ ...prev, weeksUntilExam: Number(e.target.value) || 1 }))}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb]"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-gray-400">Planner assumes 1 hour per session. Adjust anytime to see updated recommendations.</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-[#1e3a5f] to-[#2563eb] text-white rounded-xl p-6 shadow-lg flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white/10 rounded-lg p-3">
+                  <p className="text-blue-100 text-xs uppercase tracking-wide">Estimated Sessions</p>
+                  <p className="text-3xl font-bold">{estimatedSessions}</p>
+                </div>
+                <div className="bg-white/10 rounded-lg p-3">
+                  <p className="text-blue-100 text-xs uppercase tracking-wide">Total Study Hours</p>
+                  <p className="text-3xl font-bold">{Math.ceil(safeHours * safeWeeks)}</p>
+                </div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-4">
+                <p className="text-blue-100 text-xs uppercase tracking-wide mb-1">Suggested Plan</p>
+                <p className="text-lg font-semibold">{suggestedPlan}</p>
+                <p className="text-blue-100 text-sm">{coverageNote}</p>
+              </div>
+              <div className="bg-white/10 rounded-lg p-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-blue-100 text-xs uppercase tracking-wide">Estimated Cost</p>
+                  <p className="text-2xl font-bold">${estimatedCost}</p>
+                </div>
+                {savings > 0 && (
+                  <div className="text-emerald-100 text-sm font-semibold">
+                    Save about ${savings} vs single sessions
+                  </div>
+                )}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={applyPlannerToBooking}
+              className="mt-6 w-full px-4 py-3 bg-white text-[#1e3a5f] font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              Apply to booking form
+            </button>
           </div>
         </div>
       </section>
